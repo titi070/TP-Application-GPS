@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         HEROKU_API_KEY = credentials('HEROKU_API_KEY')
-        HEROKU_APP_NAME = 'your-heroku-app-name'
+        HEROKU_APP_NAME = 'your-heroku-app-name'  // Remplacez par le nom de votre application Heroku
     }
 
     stages {
@@ -32,9 +32,10 @@ pipeline {
             }
             steps {
                 script {
+                    // Configurer Heroku
+                    sh 'git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git || true'
                     // Déployer l'application sur Heroku
                     sh '''
-                    git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git
                     git push heroku main
                     '''
                 }
