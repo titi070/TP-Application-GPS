@@ -1,0 +1,47 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carte des Parkings</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 100vh; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([48.8566, 2.3522], 13); // Paris coordinates
+        
+        // Ajouter les tuiles de carte de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Fonction pour récupérer et afficher les parkings
+        async function fetchParkings() {
+            try {
+                const response = await fetch('/api/parkings?lat=48.8566&lon=2.3522'); // Coordonnées pour Paris
+                const data = await response.json();
+
+                data.locations.forEach(parking => {
+                    L.marker([parking.latitude, parking.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+                            <b>${parking.name || 'Parking'}</b><br>
+                            Adresse: ${parking.address || 'N/A'}<br>
+                            ${parking.isGarage ? 'Type: Garage' : 'Type: Rue'}<br>
+                            ${parking.tariff ? `Tarif: ${parking.tariff}` : 'Tarif: Non disponible'}
+                        `);
+                });
+            } catch (error) {
+                console.error('Error fetching parking data:', error);
+            }
+        }
+
+        fetchParkings();
+    </script>
+</body>
+</html>
