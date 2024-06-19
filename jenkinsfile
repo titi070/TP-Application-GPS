@@ -26,6 +26,13 @@ pipeline {
                 sh 'python -m unittest discover -s tests'
             }
         }
+        stage('Build Frontend') {
+            steps {
+                // Compiler les fichiers statiques si nécessaire (ex : utiliser npm pour construire)
+                // Pour cet exemple, nous n'avons pas de build process spécifique pour le frontend
+                echo 'Building frontend...'
+            }
+        }
         stage('Deploy to Heroku') {
             when {
                 branch 'main'
@@ -35,9 +42,7 @@ pipeline {
                     // Configurer Heroku
                     sh 'git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git || true'
                     // Déployer l'application sur Heroku
-                    sh '''
-                    git push heroku main
-                    '''
+                    sh 'git push heroku main'
                 }
             }
         }
