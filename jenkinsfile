@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    environment {
+        HEROKU_API_KEY = credentials('HEROKU_API_KEY')
+        HEROKU_APP_NAME = 'your-heroku-app-name'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Récupérer le code du dépôt
+                checkout scm
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                // Installer les dépendances Python
+                sh 'python -m pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                // Exécuter les tests unitaires
+                sh 'python -m unittest discover -s tests'
+            }
+        }
+        stage('Deploy to Heroku') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Déployer l'application sur Heroku
+                    sh '''
+                    git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git
+                    git push heroku main
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {
+            // Archiver les résultats des tests, etc.
+            junit '**/test-reports/*.xml'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
