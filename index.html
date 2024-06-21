@@ -96,6 +96,29 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        // Fonction pour récupérer les paramètres d'URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                vehicleType: params.get('vehicle_type'),
+                arriving: params.get('arriving'),
+                leaving: params.get('leaving')
+            };
+        }
+
+        // Pré-remplir les champs avec les paramètres d'URL
+        function populateFields(params) {
+            if (params.vehicleType) {
+                document.getElementById('vehicleType').value = params.vehicleType;
+            }
+            if (params.arriving) {
+                document.getElementById('arriving').value = params.arriving;
+            }
+            if (params.leaving) {
+                document.getElementById('leaving').value = params.leaving;
+            }
+        }
+
         // Fonction pour récupérer et afficher les parkings
         async function fetchParkings() {
             const vehicleType = document.getElementById('vehicleType').value;
@@ -177,6 +200,16 @@
 
         // Ajouter un événement de clic pour le bouton de recherche de parkings
         document.getElementById('fetchParkingsButton').addEventListener('click', fetchParkings);
+
+        // Pré-remplir les champs avec les paramètres d'URL au chargement de la page
+        window.onload = () => {
+            const params = getUrlParams();
+            populateFields(params);
+            // Si tous les paramètres sont fournis, déclencher la recherche automatiquement
+            if (params.vehicleType && params.arriving && params.leaving) {
+                fetchParkings();
+            }
+        };
     </script>
 </body>
 </html>
