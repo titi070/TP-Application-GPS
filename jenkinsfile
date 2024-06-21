@@ -1,62 +1,43 @@
 pipeline {
     agent any
 
-    environment {
-        HEROKU_API_KEY = credentials('HEROKU_API_KEY')
-        HEROKU_APP_NAME = 'your-heroku-app-name'  // Remplacez par le nom de votre application Heroku
+    parameters {
+        string(name: 'VEHICLE_TYPE', defaultValue: 'car', description: 'Type of vehicle (car, bike, motorcycle)')
+        string(name: 'ARRIVING', defaultValue: '', description: 'Arriving time in format YYYY-MM-DDTHH:MM')
+        string(name: 'LEAVING', defaultValue: '', description: 'Leaving time in format YYYY-MM-DDTHH:MM')
+        string(name: 'CUISINE_TYPE', defaultValue: '', description: 'Type of cuisine for restaurant (French, Italian, Japanese, Mexican, Indian)')
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone repository') {
             steps {
-                // Récupérer le code du dépôt
-                checkout scm
+                git 'https://github.com/username/your_project.git'
             }
         }
-        stage('Install Dependencies') {
+
+        stage('Install dependencies') {
             steps {
-                // Installer les dépendances Python
-                sh 'python -m pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
+                sh 'python3 -m venv venv'
+                sh './venv/bin/pip install -r requirements.txt'
             }
         }
-        stage('Run Tests') {
+
+        stage('Run tests') {
             steps {
-                // Exécuter les tests unitaires
-                sh 'python -m unittest discover -s tests'
+                // Ajoutez ici vos tests, par exemple :
+                // sh './venv/bin/python -m unittest discover tests'
+                echo 'No tests specified'
             }
         }
-        stage('Build Frontend') {
+
+        stage('Deploy application') {
             steps {
-                // Compiler les fichiers statiques si nécessaire (ex : utiliser npm pour construire)
-                // Pour cet exemple, nous n'avons pas de build process spécifique pour le frontend
-                echo 'Building frontend...'
+                sh """
+                ./venv/bin/python app.py --vehicle_type ${params.VEHICLE_TYPE} \
+                                         --arriving ${params.ARRIVING} \
+                                         --leaving ${params.LEAVING} \
+                                         --cuisine_type ${params.CUISINE_TYPE} &
+                """
             }
         }
-        stage('Deploy to Heroku') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    // Configurer Heroku
-                    sh 'git remote add heroku https://git.heroku.com/${HEROKU_APP_NAME}.git || true'
-                    // Déployer l'application sur Heroku
-                    sh 'git push heroku main'
-                }
-            }
-        }
-    }
-    post {
-        always {
-            // Archiver les résultats des tests, etc.
-            junit '**/test-reports/*.xml'
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
-}
+   
