@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git 'https://github.com/titi070/TP-Application-GPS'
+                git 'https://github.com/titi070/TP-Application-GPS.git'
             }
         }
 
@@ -24,20 +24,35 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                // Ajoutez ici vos tests, par exemple :
-                // sh './venv/bin/python -m unittest discover tests'
-                echo 'No tests specified'
+                script {
+                    // Ajouter des tests si disponibles, par exemple :
+                    // sh './venv/bin/python -m unittest discover tests'
+                    echo 'No tests specified'
+                }
             }
         }
 
         stage('Deploy application') {
             steps {
-                sh """
-                ./venv/bin/python app.py --vehicle_type ${params.VEHICLE_TYPE} \
-                                         --arriving ${params.ARRIVING} \
-                                         --leaving ${params.LEAVING} \
-                                         --cuisine_type ${params.CUISINE_TYPE} &
-                """
+                script {
+                    def command = "./venv/bin/python app.py"
+                    if (params.VEHICLE_TYPE) {
+                        command += " --vehicle_type ${params.VEHICLE_TYPE}"
+                    }
+                    if (params.ARRIVING) {
+                        command += " --arriving ${params.ARRIVING}"
+                    }
+                    if (params.LEAVING) {
+                        command += " --leaving ${params.LEAVING}"
+                    }
+                    if (params.CUISINE_TYPE) {
+                        command += " --cuisine_type ${params.CUISINE_TYPE}"
+                    }
+                    sh """
+                    ${command} &
+                    """
+                }
             }
         }
-   
+    }
+}
