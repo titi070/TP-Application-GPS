@@ -3,7 +3,7 @@ import random
 from datetime import datetime
 import argparse
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder='')
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser()
