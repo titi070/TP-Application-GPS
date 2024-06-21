@@ -1,56 +1,35 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'VEHICLE_TYPE', defaultValue: 'car', description: 'Type of vehicle (car, bike, motorcycle)')
-        string(name: 'ARRIVING', defaultValue: '', description: 'Arriving time in format YYYY-MM-DDTHH:MM')
-        string(name: 'LEAVING', defaultValue: '', description: 'Leaving time in format YYYY-MM-DDTHH:MM')
-        string(name: 'CUISINE_TYPE', defaultValue: '', description: 'Type of cuisine for restaurant (French, Italian, Japanese, Mexican, Indian)')
-    }
-
     stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Clone repository') {
             steps {
-                // Utilisation d'une branche spécifique, ici main
-                git branch: 'main', url: 'https://github.com/titi070/TP-Application-GPS.git', credentialsId: '01694f95-c420-4164-94da-67a89768bed6'
+                git url: 'https://github.com/titi070/TP-Application-GPS.git', branch: 'main'
             }
         }
 
         stage('Install dependencies') {
             steps {
                 bat 'python -m venv venv'
-                bat '.\\venv\\Scripts\\pip install -r requirements.txt'
+                bat 'venv\\Scripts\\activate && pip install -r requirements.txt'
             }
         }
 
         stage('Run tests') {
             steps {
-                script {
-                    // Ajouter des tests si disponibles, par exemple :
-                    // bat '.\\venv\\Scripts\\python -m unittest discover tests'
-                    echo 'No tests specified'
-                }
+                bat 'venv\\Scripts\\activate && python -m unittest discover tests'
             }
         }
 
         stage('Deploy application') {
             steps {
-                script {
-                    def command = ".\\venv\\Scripts\\python app.py"
-                    if (params.VEHICLE_TYPE) {
-                        command += " --vehicle_type ${params.VEHICLE_TYPE}"
-                    }
-                    if (params.ARRIVING) {
-                        command += " --arriving ${params.ARRIVING}"
-                    }
-                    if (params.LEAVING) {
-                        command += " --leaving ${params.LEAVING}"
-                    }
-                    if (params.CUISINE_TYPE) {
-                        command += " --cuisine_type ${params.CUISINE_TYPE}"
-                    }
-                    bat "start /B ${command}"
-                }
+                bat 'venv\\Scripts\\activate && python deploy.py'
             }
         }
     }
