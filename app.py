@@ -133,5 +133,12 @@ def reserve_parking():
 
     # Simuler une réservation réussie
     return jsonify({
-        'status':
-    
+        'status': 'Reservation successful',
+        'parking_id': parking_id,
+        'vehicle_type': vehicle_type,
+        'arriving': arriving_datetime.isoformat(),
+        'leaving': leaving_datetime.isoformat()
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
