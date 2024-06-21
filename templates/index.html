@@ -88,4 +88,111 @@
             height: 400px;
             margin-top: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Carte des Parkings et Restaurants</h1>
+    </div>
+
+    <!-- Formulaire de filtre pour les parkings -->
+    <form id="parkingForm" class="form-group">
+        <label for="vehicleType">Type de véhicule:</label>
+        <select id="vehicleType" name="vehicle_type">
+            <option value="car">Voiture</option>
+            <option value="bike">Vélo</option>
+            <option value="motorcycle">Moto</option>
+        </select>
+
+        <label for="arriving">Date et heure d'arrivée:</label>
+        <input type="datetime-local" id="arriving" name="arriving">
+
+        <label for="leaving">Date et heure de départ:</label>
+        <input type="datetime-local" id="leaving" name="leaving">
+
+        <button type="submit">Filtrer Parkings</button>
+    </form>
+
+    <!-- Formulaire de filtre pour les restaurants -->
+    <form id="restaurantForm" class="form-group">
+        <label for="cuisineType">Type de cuisine:</label>
+        <select id="cuisineType" name="cuisine_type">
+            <option value="">Tous les types</option>
+            <option value="French">Française</option>
+            <option value="Italian">Italienne</option>
+            <option value="Japanese">Japonaise</option>
+            <option value="Mexican">Mexicaine</option>
+            <option value="Indian">Indienne</option>
+        </select>
+        <button type="submit">Filtrer Restaurants</button>
+    </form>
+
+    <!-- Carte Leaflet pour afficher les résultats -->
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+
+    // Initialiser la carte Leaflet centrée sur Paris
+    var map = L.map('map').setView([48.8566, 2.3522], 13);
+
+    // Ajouter un fond de carte OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Fonction pour ajouter des marqueurs sur la carte
+    function addMarkers(data) {
+        // Supprimer les anciens marqueurs
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
+                map.removeLayer(layer);
+            }
+        });
+
+        // Ajouter de nouveaux marqueurs
+        for (var i = 0; i < data.length; i++) {
+            var parking = data[i];
+            var marker = L.marker([parking.latitude, parking.longitude]).addTo(map);
+            marker.bindPopup(`<b>${parking.name}</b><br>${parking.address}<br>Tarif: ${parking.tariff}`).openPopup();
+        }
+    }
+
+    // Soumettre le formulaire de filtre pour les parkings
+    document.getElementById('parkingForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(event.target);
+        var urlParams = new URLSearchParams(formData).toString();
+        fetch('/api/parkings?' + urlParams)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Filtered Parkings:', data.locations);
+                addMarkers(data.locations);
+            })
+            .catch(error => console.error('Error fetching parkings:', error));
+    });
+
+    // Soumettre le formulaire de filtre pour les restaurants
+    document.getElementById('restaurantForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(event.target);
+        var urlParams = new URLSearchParams(formData).toString();
+        fetch('/api/restaurants?' + urlParams)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Filtered Restaurants:', data.restaurants);
+                // Vous pouvez ajouter ici la logique pour afficher les restaurants sur la carte si nécessaire
+            })
+            .catch(error => console.error('Error fetching restaurants:', error));
+    });
+
+</script>
+
+</body>
+</html>
