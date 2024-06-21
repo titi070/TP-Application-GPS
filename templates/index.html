@@ -126,11 +126,11 @@
             <label for="cuisineType">Type de cuisine :</label>
             <select id="cuisineType">
                 <option value="">Tous les types</option>
-                <option value="French">Français</option>
-                <option value="Italian">Italien</option>
-                <option value="Japanese">Japonais</option>
-                <option value="Mexican">Mexicain</option>
-                <option value="Indian">Indien</option>
+                <option value="French" {% if cuisine_type == 'French' %}selected{% endif %}>Français</option>
+                <option value="Italian" {% if cuisine_type == 'Italian' %}selected{% endif %}>Italien</option>
+                <option value="Japanese" {% if cuisine_type == 'Japanese' %}selected{% endif %}>Japonais</option>
+                <option value="Mexican" {% if cuisine_type == 'Mexican' %}selected{% endif %}>Mexicain</option>
+                <option value="Indian" {% if cuisine_type == 'Indian' %}selected{% endif %}>Indien</option>
             </select>
         </div>
         <div class="form-group">
@@ -239,7 +239,7 @@
             }
         }
 
-                // Fonction pour gérer la réservation d'un parking
+        // Fonction pour gérer la réservation d'un parking
         async function reserveParking(parkingId) {
             const vehicleType = document.getElementById('vehicleType').value;
             const arriving = document.getElementById('arriving').value;
@@ -281,6 +281,7 @@
             document.getElementById('vehicleType').value = 'car';
             document.getElementById('arriving').value = '';
             document.getElementById('leaving').value = '';
+            document.getElementById('cuisineType').value = '';
         });
     </script>
 </body>
