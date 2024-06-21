@@ -4,8 +4,7 @@ pipeline {
     parameters {
         string(name: 'VEHICLE_TYPE', defaultValue: 'car', description: 'Type of vehicle (car, bike, motorcycle)')
         string(name: 'ARRIVING', defaultValue: '', description: 'Arriving time in format YYYY-MM-DDTHH:MM')
-        string(name: 'LEAVING', defaultValue: '', description: 'Leaving time in format YYYY-MM-DDTHH:MM')
-        string(name: 'CUISINE_TYPE', defaultValue: '', description: 'Type of cuisine for restaurant (French, Italian, Japanese, Mexican, Indian)')
+        string(name: 'LEAVING', defaultValue: '', description: 'Leaving time in format YYYY-MM-DDTHH:MM') 
     }
 
     stages {
@@ -47,9 +46,6 @@ pipeline {
                     }
                     if (params.LEAVING) {
                         command += " --leaving ${params.LEAVING}"
-                    }
-                    if (params.CUISINE_TYPE) {
-                        command += " --cuisine_type ${params.CUISINE_TYPE}"
                     }
                     bat "start /B ${command}"
                 }
