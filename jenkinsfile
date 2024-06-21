@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        // Utilisez le nom que vous avez défini dans la configuration globale de Python
+        python 'Python 3.12'
+    }
+
     stages {
         stage('Checkout SCM') {
             steps {
@@ -16,20 +21,31 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                bat 'python -m venv venv'
-                bat 'venv\\Scripts\\activate && pip install -r requirements.txt'
+                script {
+                    // Créer un environnement virtuel
+                    bat 'python -m venv venv'
+                    
+                    // Activer l'environnement virtuel et installer les dépendances
+                    bat 'venv\\Scripts\\activate && python -m pip install -r requirements.txt'
+                }
             }
         }
 
         stage('Run tests') {
             steps {
-                bat 'venv\\Scripts\\activate && python -m unittest discover tests'
+                script {
+                    // Activer l'environnement virtuel et exécuter les tests
+                    bat 'venv\\Scripts\\activate && python -m unittest discover tests'
+                }
             }
         }
 
         stage('Deploy application') {
             steps {
-                bat 'venv\\Scripts\\activate && python deploy.py'
+                script {
+                    // Activer l'environnement virtuel et déployer l'application
+                    bat 'venv\\Scripts\\activate && python deploy.py'
+                }
             }
         }
     }
