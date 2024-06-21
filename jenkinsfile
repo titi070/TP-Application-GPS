@@ -16,20 +16,24 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                bat 'C:\\Program Files\\Python312\\python.exe -m venv venv'
-                bat 'venv\\Scripts\\activate && C:\\Python39\\python.exe -m pip install -r requirements.txt'
+                // Création de l'environnement virtuel
+                bat 'C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m venv venv'
+                // Installation des dépendances depuis requirements.txt
+                bat 'venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m pip install -r requirements.txt'
             }
         }
 
         stage('Run tests') {
             steps {
-                bat 'venv\\Scripts\\activate && C:\\Python39\\python.exe -m unittest discover tests'
+                // Activation de l'environnement virtuel et exécution des tests
+                bat 'venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m unittest discover tests'
             }
         }
 
         stage('Deploy application') {
             steps {
-                bat 'venv\\Scripts\\activate && C:\\Python39\\python.exe deploy.py'
+                // Activation de l'environnement virtuel et déploiement de l'application
+                bat 'venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe deploy.py'
             }
         }
     }
