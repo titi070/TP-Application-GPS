@@ -198,14 +198,14 @@
 
         // Fonction pour récupérer et afficher les restaurants
         async function fetchRestaurants() {
-            const cuisine_type = document.getElementById('cuisine_type').value;
+            const cuisineType = document.getElementById('cuisineType').value;
 
-            console.log('Fetching restaurants for cuisine type:', cuisine_type);
+            console.log('Fetching restaurants for cuisine type:', cuisineType);
 
             try {
                 let url = '/api/restaurants';
-                if (cuisine_type) {
-                    url += `?cuisine_type=${cuisine_type}`;
+                if (cuisineType) {
+                    url += `?cuisine_type=${cuisineType}`;
                 }
                 const response = await fetch(url);
                 if (!response.ok) {
