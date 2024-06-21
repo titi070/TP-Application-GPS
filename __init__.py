@@ -51,7 +51,7 @@ parkings_data = generate_parkings(250)
 # Endpoint pour servir les fichiers statiques (HTML, CSS, JS)
 @app.route('/')
 def serve_index():
-    return send_from_directory('public', 'index.html')
+    return send_from_directory('index.html')
 
 # Endpoint pour obtenir les données de parking
 @app.route('/api/parkings', methods=['GET'])
