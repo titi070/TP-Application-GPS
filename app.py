@@ -73,7 +73,9 @@ def serve_index():
     vehicle_type = request.args.get('vehicle_type', 'car')
     arriving = request.args.get('arriving', '')
     leaving = request.args.get('leaving', '')
-    return render_template('index.html', vehicle_type=vehicle_type, arriving=arriving, leaving=leaving)
+    cuisine_type = request.args.get('cuisine_type', '')
+
+    return render_template('index.html', vehicle_type=vehicle_type, arriving=arriving, leaving=leaving, cuisine_type=cuisine_type)
 
 # Endpoint pour obtenir les données de parking
 @app.route('/api/parkings', methods=['GET'])
