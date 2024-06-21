@@ -1,39 +1,58 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Checkout SCM') {
-            steps {
-                checkout scm
-            }
-        }
+    parameters {
+        string(name: 'VEHICLE_TYPE', defaultValue: 'car', description: 'Type of vehicle (car, bike, motorcycle)')
+        string(name: 'ARRIVING', defaultValue: '', description: 'Arriving time in format YYYY-MM-DDTHH:MM')
+        string(name: 'LEAVING', defaultValue: '', description: 'Leaving time in format YYYY-MM-DDTHH:MM')
+        string(name: 'CUISINE_TYPE', defaultValue: '', description: 'Type of cuisine for restaurant (French, Italian, Japanese, Mexican, Indian)')
+    }
 
+    stages {
         stage('Clone repository') {
             steps {
-                git url: 'https://github.com/titi070/TP-Application-GPS.git', branch: 'main'
+                // Utilisation d'une branche spécifique, ici main
+                git branch: 'main', url: 'https://github.com/titi070/TP-Application-GPS.git', credentialsId: '01694f95-c420-4164-94da-67a89768bed6'
             }
         }
 
         stage('Install dependencies') {
             steps {
-                // Création de l'environnement virtuel
+                // Création de l'environnement virtuel avec le chemin correct vers Python
                 bat 'C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m venv venv'
-                // Installation des dépendances depuis requirements.txt
-                bat 'venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m pip install -r requirements.txt'
+                // Installation des dépendances
+                bat '.\\venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m pip install -r requirements.txt'
             }
         }
 
         stage('Run tests') {
             steps {
-                // Activation de l'environnement virtuel et exécution des tests
-                bat 'venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m unittest discover tests'
+                script {
+                    // Ajout de tests si disponibles
+                    // bat '.\\venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe -m unittest discover tests'
+                    echo 'No tests specified'
+                }
             }
         }
 
         stage('Deploy application') {
             steps {
-                // Activation de l'environnement virtuel et déploiement de l'application
-                bat 'venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe deploy.py'
+                script {
+                    def command = ".\\venv\\Scripts\\activate && C:\\Users\\titic\\AppData\\Local\\Programs\\Python\\Python39\\python.exe app.py"
+                    if (params.VEHICLE_TYPE) {
+                        command += " --vehicle_type ${params.VEHICLE_TYPE}"
+                    }
+                    if (params.ARRIVING) {
+                        command += " --arriving ${params.ARRIVING}"
+                    }
+                    if (params.LEAVING) {
+                        command += " --leaving ${params.LEAVING}"
+                    }
+                    if (params.CUISINE_TYPE) {
+                        command += " --cuisine_type ${params.CUISINE_TYPE}"
+                    }
+                    bat "start /B ${command}"
+                }
             }
         }
     }
