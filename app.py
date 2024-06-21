@@ -3,7 +3,7 @@ import random
 from datetime import datetime
 import argparse
 
-app = Flask(__name__,template_folder='')
+app = Flask(__name__)
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser()
@@ -109,7 +109,7 @@ def get_parkings():
 def get_restaurants():
     cuisine_type = request.args.get('cuisine_type', args.cuisine_type)  # Type de cuisine par défaut
     # Filtrer les restaurants par type de cuisine si spécifié
-    if cuisine_type:
+    if (cuisine_type):
         filtered_restaurants = [restaurant for restaurant in restaurants_data if restaurant['cuisine_type'] == cuisine_type]
     else:
         filtered_restaurants = restaurants_data
