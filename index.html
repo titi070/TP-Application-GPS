@@ -56,4 +56,127 @@
         }
 
         button:hover {
-            background
+            background-color: #0056b3;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+        }
+
+        .leaflet-popup-content {
+            margin: 10px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h1 style="font-size: 24px; margin-bottom: 15px;">Carte des Parkings</h1>
+        <label for="vehicleType">Type de véhicule :</label>
+        <select id="vehicleType">
+            <option value="car" {% if vehicle_type == 'car' %}selected{% endif %}>Voiture</option>
+            <option value="bike" {% if vehicle_type == 'bike' %}selected{% endif %}>Vélo</option>
+            <option value="motorcycle" {% if vehicle_type == 'motorcycle' %}selected{% endif %}>Moto</option>
+        </select>
+        <label for="arriving">Date et heure d'arrivée :</label>
+        <input type="datetime-local" id="arriving" value="{{ arriving }}">
+        <label for="leaving">Date et heure de départ :</label>
+        <input type="datetime-local" id="leaving" value="{{ leaving }}">
+        <button id="fetchParkingsButton">Rechercher des parkings</button>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([48.8566, 2.3522], 13); // Paris coordinates
+
+        // Ajouter les tuiles de carte de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Fonction pour récupérer et afficher les parkings
+        async function fetchParkings() {
+            const vehicleType = document.getElementById('vehicleType').value;
+            const arriving = document.getElementById('arriving').value;
+            const leaving = document.getElementById('leaving').value;
+
+            // Vérifier que les dates sont saisies
+            if (!arriving || !leaving) {
+                alert('Veuillez saisir les dates et heures d\'arrivée et de départ');
+                return;
+            }
+
+            console.log('Fetching parkings for:', { vehicleType, arriving, leaving });
+
+            try {
+                const response = await fetch(`/api/parkings?vehicle_type=${vehicleType}&arriving=${arriving}&leaving=${leaving}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Received parking data:', data);
+
+                // Clear previous markers
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                // Ajouter les marqueurs de parking
+                data.locations.forEach(parking => {
+                    const marker = L.marker([parking.latitude, parking.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+                            <b>${parking.name || 'Parking'}</b><br>
+                            Adresse: ${parking.address || 'N/A'}<br>
+                            Type: ${parking.type || 'N/A'}<br>
+                            Tarif: ${parking.tariff || 'Non disponible'}<br>
+                            <button onclick="reserveParking(${parking.id})">Réserver</button>
+                        `);
+                    console.log(`Added marker at [${parking.latitude}, ${parking.longitude}]`);
+                });
+            } catch (error) {
+                console.error('Error fetching parking data:', error);
+                alert('Erreur lors de la récupération des données de parking. Veuillez vérifier la console pour plus de détails.');
+            }
+        }
+
+        // Fonction pour gérer la réservation d'un parking
+        async function reserveParking(parkingId) {
+            const vehicleType = document.getElementById('vehicleType').value;
+            const arriving = document.getElementById('arriving').value;
+            const leaving = document.getElementById('leaving').value;
+
+            console.log('Reserving parking:', { parkingId, vehicleType, arriving, leaving });
+
+            try {
+                const response = await fetch('/api/reserve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        parking_id: parkingId,
+                        vehicle_type: vehicleType,
+                        arriving: arriving,
+                        leaving: leaving
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                alert(data.message);
+                console.log('Reservation response:', data);
+            } catch (error) {
+                console.error('Error reserving parking:', error);
+                alert('Erreur lors de la réservation. Veuillez vérifier la console pour plus de détails.');
+            }
+        }
+
+        // Ajouter un événement de clic pour le bouton de recherche de parkings
+        document.getElementById('fetchParkingsButton').addEventListener('click', fetchParkings);
+    </script>
+</body>
+</html>
