@@ -11,7 +11,8 @@ pipeline {
     stages {
         stage('Clone repository') {
             steps {
-                git 'https://github.com/titi070/TP-Application-GPS.git'
+                // Utilisation d'une branche spécifique, ici main
+                git branch: 'main', url: 'https://github.com/titi070/TP-Application-GPS.git', credentialsId: 'your-credentials-id'
             }
         }
 
