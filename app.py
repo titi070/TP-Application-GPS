@@ -70,14 +70,17 @@ restaurants_data = generate_restaurants(50)
 # Endpoint pour servir les fichiers statiques (HTML, CSS, JS)
 @app.route('/')
 def serve_index():
-    return render_template('index.html', vehicle_type=args.vehicle_type, arriving=args.arriving, leaving=args.leaving)
+    vehicle_type = request.args.get('vehicle_type', 'car')
+    arriving = request.args.get('arriving', '')
+    leaving = request.args.get('leaving', '')
+    return render_template('index.html', vehicle_type=vehicle_type, arriving=arriving, leaving=leaving)
 
 # Endpoint pour obtenir les données de parking
 @app.route('/api/parkings', methods=['GET'])
 def get_parkings():
-    vehicle_type = request.args.get('vehicle_type', 'car')  # Par défaut, type de véhicule 'car'
-    arriving = request.args.get('arriving')
-    leaving = request.args.get('leaving')
+    vehicle_type = request.args.get('vehicle_type', 'car')  # Type de véhicule par défaut
+    arriving = request.args.get('arriving', '')
+    leaving = request.args.get('leaving', '')
 
     # Convertir les dates d'arrivée et de départ en objets datetime
     try:
@@ -98,7 +101,7 @@ def get_parkings():
 # Endpoint pour obtenir les données des restaurants
 @app.route('/api/restaurants', methods=['GET'])
 def get_restaurants():
-    cuisine_type = request.args.get('cuisine_type')  # Type de cuisine en option
+    cuisine_type = request.args.get('cuisine_type', '')  # Type de cuisine par défaut
     # Filtrer les restaurants par type de cuisine si spécifié
     if cuisine_type:
         filtered_restaurants = [restaurant for restaurant in restaurants_data if restaurant['cuisine_type'] == cuisine_type]
@@ -125,11 +128,8 @@ def reserve_parking():
     # Simuler une réservation réussie
     return jsonify({
         'status': 'success',
-        'message': f'Réservation effectuée pour le parking {parking_id} avec un {vehicle_type}',
-        'arriving': arriving_datetime.isoformat(),
-        'leaving': leaving_datetime.isoformat()
-    }), 201
+        'message': f'Reservation successful for parking {parking_id}'
+    })
 
-# Démarre le serveur Flask
 if __name__ == '__main__':
     app.run(debug=True)
