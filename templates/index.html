@@ -1,198 +1,51 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte des Parkings et Restaurants</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-
-        /* Reset CSS */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Body */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-
-        /* Container */
-        .container {
-            max-width: 800px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        /* Form */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        .form-group select,
-        .form-group input[type="datetime-local"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .form-group button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        .form-group button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Map */
-        #map {
-            width: 100%;
-            height: 400px;
-            margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-
-    </style>
+    <title>Search Form</title>
 </head>
 <body>
-
-<div class="container">
-    <div class="header">
-        <h1>Carte des Parkings et Restaurants</h1>
-    </div>
-
-    <!-- Formulaire de filtre pour les parkings -->
-    <form id="parkingForm" class="form-group">
-        <label for="vehicleType">Type de véhicule:</label>
+    <h1>Search Form</h1>
+    <form action="/api/parkings" method="GET">
+        <label for="vehicleType">Vehicle Type:</label>
         <select id="vehicleType" name="vehicle_type">
-            <option value="car" {% if vehicle_type == 'car' %} selected {% endif %}>Voiture</option>
-            <option value="bike" {% if vehicle_type == 'bike' %} selected {% endif %}>Vélo</option>
-            <option value="motorcycle" {% if vehicle_type == 'motorcycle' %} selected {% endif %}>Moto</option>
+            <option value="car" {% if vehicle_type == 'car' %} selected {% endif %}>Car</option>
+            <option value="bike" {% if vehicle_type == 'bike' %} selected {% endif %}>Bike</option>
+            <option value="motorcycle" {% if vehicle_type == 'motorcycle' %} selected {% endif %}>Motorcycle</option>
         </select>
-
-        <label for="arriving">Date et heure d'arrivée:</label>
+        <br>
+        <label for="arriving">Arriving:</label>
         <input type="datetime-local" id="arriving" name="arriving" value="{{ arriving }}">
-
-        <label for="leaving">Date et heure de départ:</label>
+        <br>
+        <label for="leaving">Leaving:</label>
         <input type="datetime-local" id="leaving" name="leaving" value="{{ leaving }}">
-
-        <button type="submit">Filtrer Parkings</button>
-    </form>
-
-    <!-- Formulaire de filtre pour les restaurants -->
-    <form id="restaurantForm" class="form-group">
-        <label for="cuisineType">Type de cuisine:</label>
+        <br>
+        <label for="cuisineType">Cuisine Type:</label>
         <select id="cuisineType" name="cuisine_type">
-            <option value="" {% if cuisine_type == '' %} selected {% endif %}>Tous les types</option>
-            <option value="French" {% if cuisine_type == 'French' %} selected {% endif %}>Française</option>
-            <option value="Italian" {% if cuisine_type == 'Italian' %} selected {% endif %}>Italienne</option>
-            <option value="Japanese" {% if cuisine_type == 'Japanese' %} selected {% endif %}>Japonaise</option>
-            <option value="Mexican" {% if cuisine_type == 'Mexican' %} selected {% endif %}>Mexicaine</option>
-            <option value="Indian" {% if cuisine_type == 'Indian' %} selected {% endif %}>Indienne</option>
+            <option value="">Any</option>
+            <option value="French" {% if cuisine_type == 'French' %} selected {% endif %}>French</option>
+            <option value="Italian" {% if cuisine_type == 'Italian' %} selected {% endif %}>Italian</option>
+            <option value="Japanese" {% if cuisine_type == 'Japanese' %} selected {% endif %}>Japanese</option>
+            <option value="Mexican" {% if cuisine_type == 'Mexican' %} selected {% endif %}>Mexican</option>
+            <option value="Indian" {% if cuisine_type == 'Indian' %} selected {% endif %}>Indian</option>
         </select>
-        <button type="submit">Filtrer Restaurants</button>
+        <br>
+        <button type="submit">Search</button>
     </form>
 
-    <!-- Carte Leaflet pour afficher les résultats -->
-    <div id="map"></div>
-</div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-
-    // Initialiser la carte Leaflet centrée sur Paris
-    var map = L.map('map').setView([48.8566, 2.3522], 13);
-
-    // Ajouter un fond de carte OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Fonction pour ajouter des marqueurs sur la carte
-    function addMarkers(data) {
-        // Supprimer les anciens marqueurs
-        map.eachLayer(function (layer) {
-            if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
-                map.removeLayer(layer);
-            }
-        });
-
-        // Ajouter de nouveaux marqueurs
-        for (var i = 0; i < data.length; i++) {
-            var parking = data[i];
-            var marker = L.marker([parking.latitude, parking.longitude]).addTo(map);
-            marker.bindPopup(`<b>${parking.name}</b><br>${parking.address}<br>Tarif: ${parking.tariff}`).openPopup();
-        }
-    }
-
-    // Soumettre le formulaire de filtre pour les parkings
-    document.getElementById('parkingForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        var formData = new FormData(event.target);
-        var urlParams = new URLSearchParams(formData).toString();
-        fetch('/api/parkings?' + urlParams)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Filtered Parkings:', data.locations);
-                addMarkers(data.locations);
-            })
-            .catch(error => console.error('Error fetching parkings:', error));
-    });
-
-    // Soumettre le formulaire de filtre pour les restaurants
-    document.getElementById('restaurantForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        var formData = new FormData(event.target);
-        var urlParams = new URLSearchParams(formData).toString();
-        fetch('/api/restaurants?' + urlParams)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Filtered Restaurants:', data.restaurants);
-                // Vous pouvez ajouter ici la logique pour afficher les restaurants sur la carte si nécessaire
-            })
-            .catch(error => console.error('Error fetching restaurants:', error));
-    });
-
-</script>
-
+    <h2>Parkings List</h2>
+    <ul>
+        {% for location in locations %}
+        <li>
+            <strong>{{ location.name }}</strong><br>
+            Address: {{ location.address }}<br>
+            Latitude: {{ location.latitude }}<br>
+            Longitude: {{ location.longitude }}<br>
+            Type: {{ location.type }}<br>
+            Tariff: {{ location.tariff }}<br>
+        </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
