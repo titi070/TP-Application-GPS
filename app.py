@@ -79,7 +79,7 @@ restaurants_data = generate_restaurants(50)
 # Endpoint pour servir les fichiers statiques (HTML, CSS, JS)
 @app.route('/')
 def serve_index():
-    return send_from_directory('public', 'index.html')
+    return send_from_directory('index.html')
 
 # Endpoint pour obtenir les données de parking
 @app.route('/api/parkings', methods=['GET'])
@@ -134,3 +134,4 @@ def reserve_parking():
     # Simuler une réservation réussie
     return jsonify({
         'status':
+    
