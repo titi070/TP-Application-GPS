@@ -109,17 +109,25 @@
             <h1>Carte des Parkings et Restaurants</h1>
         </div>
         <div id="controls">
+            <div class="form-group">
             <label for="vehicleType">Type de véhicule :</label>
             <select id="vehicleType">
                 <option value="car" {% if vehicle_type == 'car' %}selected{% endif %}>Voiture</option>
                 <option value="bike" {% if vehicle_type == 'bike' %}selected{% endif %}>Vélo</option>
                 <option value="motorcycle" {% if vehicle_type == 'motorcycle' %}selected{% endif %}>Moto</option>
             </select>
+                 </div>
+<div class="form-group">
             <label for="arriving">Date et heure d'arrivée :</label>
             <input type="datetime-local" id="arriving" value="{{ arriving }}">
+    </div>
+<div class="form-group">
             <label for="leaving">Date et heure de départ :</label>
             <input type="datetime-local" id="leaving" value="{{ leaving }}">
+    </div>
+            <div class="form-group">
             <button id="fetchParkingsButton">Rechercher des parkings</button>
+        </div>
         </div>
         <div id="map"></div>
         <div class="form-group">
