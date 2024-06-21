@@ -3,48 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte des Parkings</title>
+    <title>Carte des Parkings et Restaurants</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        /* Reset CSS */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        #map {
-            height: 100vh;
-            width: 100%;
+        /* Body */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
         }
 
-        #controls {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 15px;
+        /* Container */
+        .container {
+            max-width: 800px;
+            background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 0 auto;
         }
 
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        select, input[type="datetime-local"] {
-            width: 100%;
-            padding: 8px;
+        .header h1 {
+            font-size: 24px;
             margin-bottom: 10px;
+            color: #333;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group select,
+        .form-group input[type="datetime-local"] {
+            width: 100%;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 14px;
+            margin-top: 5px;
         }
 
-        button {
-            display: block;
+        .form-group button {
             width: 100%;
             padding: 10px;
             background-color: #007BFF;
@@ -53,12 +74,23 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            margin-top: 10px;
         }
 
-        button:hover {
+        .form-group button:hover {
             background-color: #0056b3;
         }
 
+        /* Map */
+        #map {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Popup */
         .leaflet-popup-content-wrapper {
             background-color: #fff;
             border-radius: 8px;
@@ -72,21 +104,51 @@
     </style>
 </head>
 <body>
-    <div id="controls">
-        <h1 style="font-size: 24px; margin-bottom: 15px;">Carte des Parkings</h1>
-        <label for="vehicleType">Type de véhicule :</label>
-        <select id="vehicleType">
-            <option value="car" {% if vehicle_type == 'car' %}selected{% endif %}>Voiture</option>
-            <option value="bike" {% if vehicle_type == 'bike' %}selected{% endif %}>Vélo</option>
-            <option value="motorcycle" {% if vehicle_type == 'motorcycle' %}selected{% endif %}>Moto</option>
-        </select>
-        <label for="arriving">Date et heure d'arrivée :</label>
-        <input type="datetime-local" id="arriving" value="{{ arriving }}">
-        <label for="leaving">Date et heure de départ :</label>
-        <input type="datetime-local" id="leaving" value="{{ leaving }}">
-        <button id="fetchParkingsButton">Rechercher des parkings</button>
+    <header style="text-align: center;">
+        <!-- Titre ou nom de votre entreprise -->
+        <h1>QuickPark</h1>
+    </header>
+    <div class="container">
+        <div class="header">
+            <h1>Carte des Parkings et Restaurants</h1>
+        </div>
+        <div class="form-group">
+            <label for="vehicleType">Type de véhicule :</label>
+            <select id="vehicleType">
+                <option value="car">Voiture</option>
+                <option value="bike">Vélo</option>
+                <option value="motorcycle">Moto</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="arriving">Date et heure d'arrivée :</label>
+            <input type="datetime-local" id="arriving">
+        </div>
+        <div class="form-group">
+            <label for="leaving">Date et heure de départ :</label>
+            <input type="datetime-local" id="leaving">
+        </div>
+        <div class="form-group">
+            <button id="fetchParkingsButton">Rechercher des parkings</button>
+        </div>
+        <div id="map"></div>
+        <div class="form-group">
+            <label for="cuisineType">Type de cuisine :</label>
+            <select id="cuisineType">
+                <option value="">Tous les types</option>
+                <option value="French">Français</option>
+                <option value="Italian">Italien</option>
+                <option value="Japanese">Japonais</option>
+                <option value="Mexican">Mexicain</option>
+                <option value="Indian">Indien</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button id="fetchRestaurantsButton">Rechercher des restaurants</button>
+            <button id="resetButton">Réinitialiser</button> <!-- Ajout du bouton Reset -->
+        </div>
     </div>
-    <div id="map"></div>
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
         const map = L.map('map').setView([48.8566, 2.3522], 13); // Paris coordinates
@@ -144,39 +206,53 @@
             }
         }
 
+        // Fonction pour récupérer et afficher les restaurants
+        async function fetchRestaurants() {
+            const cuisineType = document.getElementById('cuisineType').value;
+
+            console.log('Fetching restaurants for cuisine type:', cuisineType);
+
+            try {
+                let url = '/api/restaurants';
+                if (cuisineType) {
+                    url += `?cuisine_type=${cuisineType}`;
+                }
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log('Received restaurant data:', data);
+
+                // Clear previous markers
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                // Ajouter les marqueurs de restaurants
+                data.restaurants.forEach(restaurant => {
+                    const marker = L.marker([restaurant.latitude, restaurant.longitude])
+                        .addTo(map)
+                        .bindPopup(`
+                            <b>${restaurant.name || 'Restaurant'}</b><br>
+                            Adresse: ${restaurant.address || 'N/A'}<br>
+                            Type de cuisine: ${restaurant.cuisine_type || 'N/A'}<br>
+                            Note: ${restaurant.rating || 'N/A'}<br>
+                        `);
+                    console.log(`Added marker at [${restaurant.latitude}, ${restaurant.longitude}]`);
+                });
+            } catch (error) {
+                console.error('Error fetching restaurant data:', error);
+                alert('Erreur lors de la récupération des données de restaurant. Veuillez vérifier la console pour plus de détails.');
+            }
+        }
+
         // Fonction pour gérer la réservation d'un parking
         async function reserveParking(parkingId) {
             const vehicleType = document.getElementById('vehicleType').value;
             const arriving = document.getElementById('arriving').value;
             const leaving = document.getElementById('leaving').value;
 
-            console.log('Reserving parking:', { parkingId, vehicleType, arriving, leaving });
-
-            try {
-                const response = await fetch('/api/reserve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        parking_id: parkingId,
-                        vehicle_type: vehicleType,
-                        arriving: arriving,
-                        leaving: leaving
-                    })
-                });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                alert(data.message);
-                console.log('Reservation response:', data);
-            } catch (error) {
-                console.error('Error reserving parking:', error);
-                alert('Erreur lors de la réservation. Veuillez vérifier la console pour plus de détails.');
-            }
-        }
-
-        // Ajouter un événement de clic pour le bouton de recherche de parkings
-        document.getElementById('fetchParkingsButton').addEventListener('click', fetchParkings);
-    </script>
-</body>
-</html>
+            console.log('
