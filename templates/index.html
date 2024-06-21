@@ -104,16 +104,16 @@
     <form id="parkingForm" class="form-group">
         <label for="vehicleType">Type de véhicule:</label>
         <select id="vehicleType" name="vehicle_type">
-            <option value="car">Voiture</option>
-            <option value="bike">Vélo</option>
-            <option value="motorcycle">Moto</option>
+            <option value="car" {% if vehicle_type == 'car' %} selected {% endif %}>Voiture</option>
+            <option value="bike" {% if vehicle_type == 'bike' %} selected {% endif %}>Vélo</option>
+            <option value="motorcycle" {% if vehicle_type == 'motorcycle' %} selected {% endif %}>Moto</option>
         </select>
 
         <label for="arriving">Date et heure d'arrivée:</label>
-        <input type="datetime-local" id="arriving" name="arriving">
+        <input type="datetime-local" id="arriving" name="arriving" value="{{ arriving }}">
 
         <label for="leaving">Date et heure de départ:</label>
-        <input type="datetime-local" id="leaving" name="leaving">
+        <input type="datetime-local" id="leaving" name="leaving" value="{{ leaving }}">
 
         <button type="submit">Filtrer Parkings</button>
     </form>
@@ -122,12 +122,12 @@
     <form id="restaurantForm" class="form-group">
         <label for="cuisineType">Type de cuisine:</label>
         <select id="cuisineType" name="cuisine_type">
-            <option value="">Tous les types</option>
-            <option value="French">Française</option>
-            <option value="Italian">Italienne</option>
-            <option value="Japanese">Japonaise</option>
-            <option value="Mexican">Mexicaine</option>
-            <option value="Indian">Indienne</option>
+            <option value="" {% if cuisine_type == '' %} selected {% endif %}>Tous les types</option>
+            <option value="French" {% if cuisine_type == 'French' %} selected {% endif %}>Française</option>
+            <option value="Italian" {% if cuisine_type == 'Italian' %} selected {% endif %}>Italienne</option>
+            <option value="Japanese" {% if cuisine_type == 'Japanese' %} selected {% endif %}>Japonaise</option>
+            <option value="Mexican" {% if cuisine_type == 'Mexican' %} selected {% endif %}>Mexicaine</option>
+            <option value="Indian" {% if cuisine_type == 'Indian' %} selected {% endif %}>Indienne</option>
         </select>
         <button type="submit">Filtrer Restaurants</button>
     </form>
