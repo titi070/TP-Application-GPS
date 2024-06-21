@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, render_template
 import random
 from datetime import datetime
 import argparse
@@ -79,14 +79,14 @@ restaurants_data = generate_restaurants(50)
 # Endpoint pour servir les fichiers statiques (HTML, CSS, JS)
 @app.route('/')
 def serve_index():
-    return send_file('index.html')
+    return render_template('index.html', vehicle_type=args.vehicle_type, arriving=args.arriving, leaving=args.leaving)
 
 # Endpoint pour obtenir les données de parking
 @app.route('/api/parkings', methods=['GET'])
 def get_parkings():
-    vehicle_type = args.vehicle_type  # Type de véhicule par défaut
-    arriving = args.arriving
-    leaving = args.leaving
+    vehicle_type = request.args.get('vehicle_type', args.vehicle_type)  # Type de véhicule par défaut
+    arriving = request.args.get('arriving', args.arriving)
+    leaving = request.args.get('leaving', args.leaving)
 
     # Convertir les dates d'arrivée et de départ en objets datetime
     try:
@@ -107,7 +107,7 @@ def get_parkings():
 # Endpoint pour obtenir les données des restaurants
 @app.route('/api/restaurants', methods=['GET'])
 def get_restaurants():
-    cuisine_type = args.cuisine_type  # Type de cuisine par défaut
+    cuisine_type = request.args.get('cuisine_type', args.cuisine_type)  # Type de cuisine par défaut
     # Filtrer les restaurants par type de cuisine si spécifié
     if cuisine_type:
         filtered_restaurants = [restaurant for restaurant in restaurants_data if restaurant['cuisine_type'] == cuisine_type]
@@ -133,11 +133,8 @@ def reserve_parking():
 
     # Simuler une réservation réussie
     return jsonify({
-        'status': 'Reservation successful',
-        'parking_id': parking_id,
-        'vehicle_type': vehicle_type,
-        'arriving': arriving_datetime.isoformat(),
-        'leaving': leaving_datetime.isoformat()
+        'status': 'success',
+        'message': f'Reservation successful for parking {parking_id}'
     })
 
 if __name__ == '__main__':
